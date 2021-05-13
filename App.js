@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import * as Location from 'expo-location'
 
+import WeatherInfo from './components/WeatherInfo'
+
 const WEATHER_API_KEY = '9d23b93fc30e76ae3791aa49d3defb43'
 const BASE_URL_WEATHER = 'https://api.openweathermap.org/data/2.5/weather?'
 
@@ -26,7 +28,7 @@ export default function App () {
 
       const location = await Location.getCurrentPositionAsync()
       const { latitude, longitude } = location.coords
-      const uri = `${BASE_URL_WEATHER}lat=${latitude}&lon=${longitude}&units=${unitsSystem}&appid=${WEATHER_API_KEY}`
+      const uri = `${BASE_URL_WEATHER}lat=${latitude}&lon=${longitude}&lang=pt_br&units=${unitsSystem}&appid=${WEATHER_API_KEY}`
       const response = await fetch(uri)
       const result = await response.json()
 
@@ -47,8 +49,10 @@ export default function App () {
 
     return (
       <View style={styles.container}>
-        <Text>{temp}</Text>
         <StatusBar style='auto' />
+        <View style={styles.main}>
+          <WeatherInfo currentWeather={currentWeather} />
+        </View>
       </View>
     )
   } else {
@@ -64,8 +68,10 @@ export default function App () {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center'
+  },
+  main: {
+    justifyContent: 'center',
+    flex: 1
   }
 })
