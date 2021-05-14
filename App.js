@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import * as Location from 'expo-location'
 
 import WeatherInfo from './components/WeatherInfo'
+import UnitsPicker from './components/UnitsPicker'
 
 const WEATHER_API_KEY = '9d23b93fc30e76ae3791aa49d3defb43'
 const BASE_URL_WEATHER = 'https://api.openweathermap.org/data/2.5/weather?'
@@ -15,7 +16,7 @@ export default function App () {
 
   useEffect(() => {
     load()
-  }, [])
+  }, [unitsSystem])
 
   async function load () {
     try {
@@ -43,14 +44,14 @@ export default function App () {
   }
 
   if (currentWeather) {
-    const {
-      main: { temp }
-    } = currentWeather
-
     return (
       <View style={styles.container}>
         <StatusBar style='auto' />
         <View style={styles.main}>
+          <UnitsPicker
+            unitsSystem={unitsSystem}
+            setUnitsSystem={setUnitsSystem}
+          />
           <WeatherInfo currentWeather={currentWeather} />
         </View>
       </View>
