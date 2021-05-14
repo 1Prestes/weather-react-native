@@ -1,10 +1,12 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native'
 import * as Location from 'expo-location'
 
 import WeatherInfo from './components/WeatherInfo'
 import UnitsPicker from './components/UnitsPicker'
+import { colors } from './utils/index'
+import ReloadIcon from './components/ReloadIcon'
 
 const WEATHER_API_KEY = '9d23b93fc30e76ae3791aa49d3defb43'
 const BASE_URL_WEATHER = 'https://api.openweathermap.org/data/2.5/weather?'
@@ -19,6 +21,9 @@ export default function App () {
   }, [unitsSystem])
 
   async function load () {
+    setCurrentWeather(null)
+    setErrorMessage(null)
+
     try {
       let { status } = await Location.requestForegroundPermissionsAsync()
 
@@ -29,7 +34,7 @@ export default function App () {
 
       const location = await Location.getCurrentPositionAsync()
       const { latitude, longitude } = location.coords
-      const uri = `${BASE_URL_WEATHER}lat=${latitude}&lon=${longitude}&lang=pt_br&units=${unitsSystem}&appid=${WEATHER_API_KEY}`
+      const uri = `${BASE_URL_WEATHER}lat=${latitude}&lon=${longitude}&units=${unitsSystem}&appid=${WEATHER_API_KEY}`
       const response = await fetch(uri)
       const result = await response.json()
 
@@ -52,14 +57,22 @@ export default function App () {
             unitsSystem={unitsSystem}
             setUnitsSystem={setUnitsSystem}
           />
+          <ReloadIcon load={load} />
           <WeatherInfo currentWeather={currentWeather} />
         </View>
+      </View>
+    )
+  } else if (errorMessage) {
+    return (
+      <View style={styles.container}>
+        <Text>{errorMessage}</Text>
+        <StatusBar style='auto' />
       </View>
     )
   } else {
     return (
       <View style={styles.container}>
-        <Text>{errorMessage}</Text>
+        <ActivityIndicator size='large' color={colors.PRIMARY_COLOR} />
         <StatusBar style='auto' />
       </View>
     )
