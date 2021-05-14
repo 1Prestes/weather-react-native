@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
+    "metro-react-native-babel-preset": "^0.66.0",
     "react-native-dotenv": "^2.5.5"
   },
   "private": true
