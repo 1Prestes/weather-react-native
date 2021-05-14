@@ -7,6 +7,7 @@ import WeatherInfo from './components/WeatherInfo'
 import UnitsPicker from './components/UnitsPicker'
 import { colors } from './utils/index'
 import ReloadIcon from './components/ReloadIcon'
+import WeatherDetails from './components/WeatherDetails'
 
 const WEATHER_API_KEY = '9d23b93fc30e76ae3791aa49d3defb43'
 const BASE_URL_WEATHER = 'https://api.openweathermap.org/data/2.5/weather?'
@@ -60,12 +61,16 @@ export default function App () {
           <ReloadIcon load={load} />
           <WeatherInfo currentWeather={currentWeather} />
         </View>
+        <WeatherDetails
+          currentWeather={currentWeather}
+          unitsSystem={unitsSystem}
+        />
       </View>
     )
   } else if (errorMessage) {
     return (
       <View style={styles.container}>
-        <Text>{errorMessage}</Text>
+        <Text style={{ textAlign: 'center' }}>{errorMessage}</Text>
         <StatusBar style='auto' />
       </View>
     )
