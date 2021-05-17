@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {
   View,
   Text,
@@ -7,17 +7,22 @@ import {
   StyleSheet
 } from 'react-native'
 import { MaterialIcons, AntDesign } from '@expo/vector-icons'
+import { useSelector, useDispatch } from 'react-redux'
 
+import { addCity } from '../store/citySlice'
 import { colors } from '../utils/index'
 
 const { PRIMARY_COLOR } = colors
 
 export default function Search ({ navigation }) {
-  const [city, setCity] = useState(null)
+  const city = useSelector(state => state.city.city)
+  const dispatch = useDispatch()
 
   const handleChange = text => {
-    setCity(text)
+    dispatch(addCity(text))
   }
+
+  const handleClick = () => {}
 
   return (
     <View style={styles.mainContainer}>
