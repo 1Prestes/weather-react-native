@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   View,
   Text,
@@ -15,22 +15,19 @@ const { PRIMARY_COLOR } = colors
 export default function Search ({ navigation }) {
   const [city, setCity] = useState(null)
 
-  const handleChange = event => {
-    setCity(event.target.value)
+  const handleChange = text => {
+    setCity(text)
   }
-
-  useEffect(() => {
-    console.log(city)
-  }, [city])
 
   return (
     <View style={styles.mainContainer}>
       <View style={styles.searchContainer}>
-        <Text style={styles.title}>Type your location here:</Text>
+        <Text style={styles.title}>Type your location here: {city}</Text>
         <TextInput
           style={styles.input}
           type='text'
           value={city}
+          onChangeText={handleChange}
           placeholder='Ex: New York'
         />
       </View>
