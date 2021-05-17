@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   View,
   Text,
@@ -9,20 +9,24 @@ import {
 import { MaterialIcons, AntDesign } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { addCity } from '../store/citySlice'
+import { addCity, fetchWeatherByCity } from '../store/citySlice'
 import { colors } from '../utils/index'
 
 const { PRIMARY_COLOR } = colors
 
 export default function Search ({ navigation }) {
+  const [cityValue, setCityValue] = useState(null)
   const city = useSelector(state => state.city.city)
   const dispatch = useDispatch()
 
   const handleChange = text => {
-    dispatch(addCity(text))
+    setCityValue(text)
   }
 
-  const handleClick = () => {}
+  const handleClick = () => {
+    dispatch(addCity(cityValue))
+    dispatch(fetchWeatherByCity(city))
+  }
 
   return (
     <View style={styles.mainContainer}>
@@ -31,17 +35,14 @@ export default function Search ({ navigation }) {
         <TextInput
           style={styles.input}
           type='text'
-          value={city}
+          value={cityValue}
           onChangeText={handleChange}
           placeholder='Ex: New York'
         />
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Home')}
-        >
+        <TouchableOpacity style={styles.button} onPress={handleClick}>
           <Text
             style={{ textAlign: 'center', fontWeight: 'bold', color: '#fff' }}
           >
