@@ -8,6 +8,12 @@ export const citySlice = createSlice({
   },
   reducers: {
     addPreviousSarches: (state, action) => {
+      const exists = state.previousSarches.filter(
+        city => city.city.toLowerCase() === action.payload.city.toLowerCase()
+      )
+
+      if (!!exists.length) return
+
       if (state.previousSarches.length >= 3) {
         state.previousSarches.unshift(action.payload)
         state.previousSarches.length = 3

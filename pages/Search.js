@@ -23,7 +23,7 @@ export default function Search ({ navigation }) {
 
   useEffect(() => {
     setIsLoading(false)
-  }, [previousSarches])
+  }, [])
 
   const handleChange = text => {
     setCity(text)
@@ -52,6 +52,9 @@ export default function Search ({ navigation }) {
     navigation.navigate('Home', {
       queryFetch: `${latitude},${longitude}`
     })
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
   }
 
   const handlePreviousSarches = queryFetch => {
@@ -63,6 +66,7 @@ export default function Search ({ navigation }) {
   if (!isLoading) {
     return (
       <View style={styles.mainContainer}>
+        <StatusBar style='auto' />
         <View style={styles.searchContainer}>
           <Text style={styles.title}>Type your location here:</Text>
           <TextInput
