@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, View, ActivityIndicator } from 'react-native'
-import * as Location from 'expo-location'
 import { WEATHER_API_KEY } from '@env'
+import { useDispatch } from 'react-redux'
 
 import WeatherInfo from '../components/WeatherInfo'
 import UnitsPicker from '../components/UnitsPicker'
@@ -12,10 +12,13 @@ import WeatherDetails from '../components/WeatherDetails'
 
 const BASE_URL_WEATHER = 'https://api.openweathermap.org/data/2.5/weather?'
 
-export default function Home () {
+export default function Home ({ route }) {
+  const { queryFetch } = route.params
+
   const [errorMessage, setErrorMessage] = useState(null)
   const [currentWeather, setCurrentWeather] = useState(null)
   const [unitsSystem, setUnitsSystem] = useState('metric')
+  const dispatch = useDispatch()
 
   useEffect(() => {
     load()
@@ -26,23 +29,33 @@ export default function Home () {
     setErrorMessage(null)
 
     try {
-      let { status } = await Location.requestForegroundPermissionsAsync()
+      if (queryFetch) {
+        const fetchCity = await fetch(
+          `https://api.opencagedata.com/geocode/v1/json?key=e85809527b0341b18712ec1bacc3aab9&q=${queryFetch}`
+        )
+        const resultCity = await fetchCity.json()
 
-      if (status !== 'granted') {
-        setErrorMessage('Acces to location is needed to run the app')
-        return
-      }
+        const {
+          components: { country, state, state_code },
+          geometry: { lat, lng }
+        } = resultCity.results[0]
+        // const previousSarches = {
+        //   country,
+        //   state,
+        //   state_code,
+        //   lat,
+        //   lng
+        // }
+        dispatch(addPreviousSarches({ country, state, state_code, lat, lng }))
+        const uri = `${BASE_URL_WEATHER}lat=${lat}&lon=${lng}&units=${unitsSystem}&appid=${WEATHER_API_KEY}`
 
-      const location = await Location.getCurrentPositionAsync()
-      const { latitude, longitude } = location.coords
-      const uri = `${BASE_URL_WEATHER}lat=${latitude}&lon=${longitude}&units=${unitsSystem}&appid=${WEATHER_API_KEY}`
-      const response = await fetch(uri)
-      const result = await response.json()
-
-      if (response.ok) {
-        setCurrentWeather(result)
-      } else {
-        setErrorMessage(result.message)
+        const response = await fetch(uri)
+        const result = await response.json()
+        if (response.ok) {
+          setCurrentWeather(result)
+        } else {
+          setErrorMessage(result.message)
+        }
       }
     } catch (error) {
       setErrorMessage(error.message)

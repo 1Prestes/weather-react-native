@@ -7,25 +7,38 @@ import {
   StyleSheet
 } from 'react-native'
 import { MaterialIcons, AntDesign } from '@expo/vector-icons'
-import { useSelector, useDispatch } from 'react-redux'
+import * as Location from 'expo-location'
 
-import { addCity, fetchWeatherByCity } from '../store/citySlice'
 import { colors } from '../utils/index'
 
 const { PRIMARY_COLOR } = colors
 
 export default function Search ({ navigation }) {
-  const [cityValue, setCityValue] = useState(null)
-  const city = useSelector(state => state.city.city)
-  const dispatch = useDispatch()
+  const [city, setCity] = useState(null)
 
   const handleChange = text => {
-    setCityValue(text)
+    setCity(text)
   }
 
-  const handleClick = () => {
-    dispatch(addCity(cityValue))
-    dispatch(fetchWeatherByCity(city))
+  const handleSubmit = () => {
+    if (city) return navigation.navigate('Home', { queryFetch: city })
+
+    return alert('Please, type your city ou select on GPS')
+  }
+
+  const handleLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync()
+
+    if (status !== 'granted') {
+      setErrorMessage('Acces to location is needed to run the app')
+      return
+    }
+
+    const location = await Location.getCurrentPositionAsync()
+    const { latitude, longitude } = location.coords
+    return navigation.navigate('Home', {
+      queryFetch: `${latitude},${longitude}`
+    })
   }
 
   return (
@@ -35,24 +48,21 @@ export default function Search ({ navigation }) {
         <TextInput
           style={styles.input}
           type='text'
-          value={cityValue}
+          value={city}
           onChangeText={handleChange}
           placeholder='Ex: New York'
         />
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleClick}>
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text
             style={{ textAlign: 'center', fontWeight: 'bold', color: '#fff' }}
           >
             Submit
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Home')}
-        >
+        <TouchableOpacity style={styles.button} onPress={handleLocation}>
           <Text style={{ textAlign: 'center', color: '#fff' }}>
             <MaterialIcons name='gps-fixed' size={24} color='white' />
           </Text>
