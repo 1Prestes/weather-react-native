@@ -9,6 +9,7 @@ import UnitsPicker from '../components/UnitsPicker'
 import { colors } from '../utils/index'
 import ReloadIcon from '../components/ReloadIcon'
 import WeatherDetails from '../components/WeatherDetails'
+import { addPreviousSarches } from '../store/citySlice'
 
 const BASE_URL_WEATHER = 'https://api.openweathermap.org/data/2.5/weather?'
 
@@ -34,23 +35,18 @@ export default function Home ({ route }) {
           `https://api.opencagedata.com/geocode/v1/json?key=e85809527b0341b18712ec1bacc3aab9&q=${queryFetch}`
         )
         const resultCity = await fetchCity.json()
-
         const {
           components: { country, state, state_code },
           geometry: { lat, lng }
         } = resultCity.results[0]
-        // const previousSarches = {
-        //   country,
-        //   state,
-        //   state_code,
-        //   lat,
-        //   lng
-        // }
-        dispatch(addPreviousSarches({ country, state, state_code, lat, lng }))
+        
         const uri = `${BASE_URL_WEATHER}lat=${lat}&lon=${lng}&units=${unitsSystem}&appid=${WEATHER_API_KEY}`
-
         const response = await fetch(uri)
         const result = await response.json()
+
+        dispatch(
+          addPreviousSarches({ country, state, state_code, city: result.name, lat, lng })
+        )
         if (response.ok) {
           setCurrentWeather(result)
         } else {

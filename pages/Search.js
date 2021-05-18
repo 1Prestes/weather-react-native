@@ -1,103 +1,132 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { StatusBar } from 'expo-status-bar'
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet
+  StyleSheet,
+  ActivityIndicator
 } from 'react-native'
 import { MaterialIcons, AntDesign } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 
 import { colors } from '../utils/index'
+import { useSelector } from 'react-redux'
 
 const { PRIMARY_COLOR } = colors
 
 export default function Search ({ navigation }) {
   const [city, setCity] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const previousSarches = useSelector(state => state.city.previousSarches)
+
+  useEffect(() => {
+    setIsLoading(false)
+  }, [previousSarches])
 
   const handleChange = text => {
     setCity(text)
   }
 
   const handleSubmit = () => {
+    setCity(null)
     if (city) return navigation.navigate('Home', { queryFetch: city })
 
-    return alert('Please, type your city ou select on GPS')
+    return alert('Please, type your city or select on GPS')
   }
 
   const handleLocation = async () => {
+    setIsLoading(true)
     let { status } = await Location.requestForegroundPermissionsAsync()
 
     if (status !== 'granted') {
+      setIsLoading(false)
       setErrorMessage('Acces to location is needed to run the app')
       return
     }
 
     const location = await Location.getCurrentPositionAsync()
     const { latitude, longitude } = location.coords
-    return navigation.navigate('Home', {
+
+    navigation.navigate('Home', {
       queryFetch: `${latitude},${longitude}`
     })
   }
 
-  return (
-    <View style={styles.mainContainer}>
-      <View style={styles.searchContainer}>
-        <Text style={styles.title}>Type your location here: {city}</Text>
-        <TextInput
-          style={styles.input}
-          type='text'
-          value={city}
-          onChangeText={handleChange}
-          placeholder='Ex: New York'
-        />
-      </View>
+  const handlePreviousSarches = queryFetch => {
+    return navigation.navigate('Home', {
+      queryFetch
+    })
+  }
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text
-            style={{ textAlign: 'center', fontWeight: 'bold', color: '#fff' }}
-          >
-            Submit
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleLocation}>
-          <Text style={{ textAlign: 'center', color: '#fff' }}>
-            <MaterialIcons name='gps-fixed' size={24} color='white' />
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.previousSearchesContainer}>
-        <Text style={styles.previousTitle}>Previous Searches</Text>
-
-        <View style={styles.previousSearch}>
-          <View style={styles.city}>
-            <Text style={styles.titleText}>Rio de Janeiro</Text>
-            <Text>RJ, Brazil</Text>
-          </View>
-          <AntDesign name='arrowright' size={24} color={PRIMARY_COLOR} />
+  if (!isLoading) {
+    return (
+      <View style={styles.mainContainer}>
+        <View style={styles.searchContainer}>
+          <Text style={styles.title}>Type your location here:</Text>
+          <TextInput
+            style={styles.input}
+            type='text'
+            value={city}
+            onChangeText={handleChange}
+            placeholder='Ex: New York'
+          />
         </View>
 
-        <View style={styles.previousSearch}>
-          <View style={styles.city}>
-            <Text style={styles.titleText}>Rio de Janeiro</Text>
-            <Text>RJ, Brazil</Text>
-          </View>
-          <AntDesign name='arrowright' size={24} color={PRIMARY_COLOR} />
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text
+              style={{ textAlign: 'center', fontWeight: 'bold', color: '#fff' }}
+            >
+              Submit
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleLocation}>
+            <Text style={{ textAlign: 'center', color: '#fff' }}>
+              <MaterialIcons name='gps-fixed' size={24} color='white' />
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.previousSearch}>
-          <View style={styles.city}>
-            <Text style={styles.titleText}>Rio de Janeiro</Text>
-            <Text>RJ, Brazil</Text>
-          </View>
-          <AntDesign name='arrowright' size={24} color={PRIMARY_COLOR} />
+        <View style={styles.previousSearchesContainer}>
+          {!previousSarches.length && (
+            <Text style={styles.previousTitle}>No Previous Searches</Text>
+          )}
+          {!!previousSarches.length && (
+            <>
+              <Text style={styles.previousTitle}>Previous Searches</Text>
+              {previousSarches.map((city, index) => (
+                <View key={index} style={styles.previousSearch}>
+                  <View style={styles.city}>
+                    <Text style={styles.titleText}>{city.city}</Text>
+                    <Text>
+                      {city.state_code}, {city.country}
+                    </Text>
+                  </View>
+                  <AntDesign
+                    name='arrowright'
+                    size={24}
+                    color={PRIMARY_COLOR}
+                    onPress={() =>
+                      handlePreviousSarches(`${city.lat},${city.lng}`)
+                    }
+                  />
+                </View>
+              ))}
+            </>
+          )}
         </View>
       </View>
-    </View>
-  )
+    )
+  } else {
+    return (
+      <View style={styles.locationContainer}>
+        <StatusBar style='auto' />
+        <ActivityIndicator size='large' color={colors.PRIMARY_COLOR} />
+      </View>
+    )
+  }
 }
 
 const styles = StyleSheet.create({
@@ -107,6 +136,10 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     marginBottom: 16
+  },
+  locationContainer: {
+    flex: 1,
+    justifyContent: 'center'
   },
   title: {
     fontSize: 16

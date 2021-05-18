@@ -1,16 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-// export const fetchWeatherByCity = createAsyncThunk(
-//   'city/fetchWeatherByCity',
-//   async city => {
-//     console.log(city)
-//     const response = await fetch(
-//       `https://api.opencagedata.com/geocode/v1/json?key=e85809527b0341b18712ec1bacc3aab9&q=${city}`
-//     )
-//     return response.json()
-//   }
-// )
-
 export const citySlice = createSlice({
   name: 'city',
   initialState: {
@@ -19,11 +8,11 @@ export const citySlice = createSlice({
   },
   reducers: {
     addPreviousSarches: (state, action) => {
-      if (previousSarches.length >= 3) {
-        previousSarches.unshift(action.payload)
-        previousSarches.length = 3
+      if (state.previousSarches.length >= 3) {
+        state.previousSarches.unshift(action.payload)
+        state.previousSarches.length = 3
       } else {
-        previousSarches.unshift(action.payload)
+        state.previousSarches.unshift(action.payload)
       }
     }
   }
